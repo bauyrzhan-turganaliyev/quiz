@@ -36,7 +36,7 @@ namespace Quiz
         private void OnGameEnd(bool flag, GameData gameData)
         {
             _uiService.OnGameEnded(flag, gameData, _progressService.PlayerProgress.BestScore);
-            if (_progressService.PlayerProgress.BestScore < gameData.CorrectAnswerCount)
+            if (_progressService.PlayerProgress.BestScore < gameData.CorrectAnswerCount && flag)
             {
                 _progressService.PlayerProgress.BestScore = gameData.CorrectAnswerCount;
                 _progressService.SaveLoadService.SaveProgress(_progressService.PlayerProgress);

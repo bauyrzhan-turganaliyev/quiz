@@ -5,7 +5,7 @@ namespace SaveLoad
     public class ProgressService
     {
         public PlayerProgress PlayerProgress { get; private set; }
-        public SaveLoadService SaveLoadService { get; private set; }
+        public readonly SaveLoadService SaveLoadService;
 
         public ProgressService()
         {

@@ -7,7 +7,7 @@ namespace Config
     public class QuizData : ScriptableObject
     {
         public bool IsShuffled;
-        public List<QuestionData> QuestionsDataList;
+        public QuestionData[] QuestionsDataList;
         
     }
 }

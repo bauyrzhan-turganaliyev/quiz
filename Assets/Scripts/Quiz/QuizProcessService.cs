@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using Config;
 using Data;
 using TMPro;
-using Tools.Alghoritm;
+using Tools.Algorithm;
 using Tools.UI;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using UnityEngine.Events;
 
 namespace Quiz
 {
@@ -21,38 +21,41 @@ namespace Quiz
         public Action<GameData> OnUpdateGameUI;
         public Action<bool, GameData> OnGameEnd;
         
-        private List<QuestionData> _questionsList;
-        private IShuffler<QuestionData> _shuffler;
+        private QuestionData[] _questionsList;
+        private Shuffler<QuestionData> _shuffler;
         private GameData _gameData;
 
         private GameStatus _gameStatus;
         private int _questionsCount;
+
         private float _elapsed;
 
         public void Init()
         {
             _shuffler = new Shuffler<QuestionData>();
-            _questionsList = new List<QuestionData>();
+            _questionsList = _quizData.QuestionsDataList;
+            _questionsCount = _questionsList.Length;
+            SetupGameConfig();
+            _gameData = new GameData(_gameConfig);
         }
+        
         public void Begin()
         {
             _gameStatus = GameStatus.Game;
             
             CleanUp();
-            PrepareQuestionList();
-            if (_quizData.IsShuffled) ShuffleQuestionList();
+            _gameData.Reset();
+            if (_quizData.IsShuffled) 
+                ShuffleQuestionList();
 
-            _gameData = new GameData(_gameConfig);
-            _questionsCount = _quizData.QuestionsDataList.Count;
             OnUpdateGameUI?.Invoke(_gameData);
 
             InitQuestion(_gameData.CurrentQuestion);
         }
-        public void End(bool flag)
+        public void End(bool isWin)
         {
             _gameStatus = GameStatus.NonGame;
-            CleanUp();
-            OnGameEnd?.Invoke(flag, _gameData);
+            OnGameEnd?.Invoke(isWin, _gameData);
         }
         private void Update()
         {
@@ -68,87 +71,73 @@ namespace Quiz
             _gameData.AddSecond();
             OnUpdateGameUI?.Invoke(_gameData);
             
-            if (_gameData.AllSeconds > _gameConfig.MaxSeconds && _gameConfig.MaxSeconds != -1) End(false);
+            if (_gameData.AllSeconds > _gameConfig.MaxSeconds) 
+                End(false);
         }
+
         private void InitQuestion(int questionID)
         {
             ClearButtons();
-            
+
             _questionText.text = _questionsList[questionID].Question;
-            var optionsCount = _questionsList[questionID].WrongAnswers.Count + 1;
-            var correctAnswerIndex = Random.Range(0, optionsCount);
-            bool isCorrectInit = false;
-            
-            for (int i = 0; i < optionsCount; i++)
+            var correctAnswerIndex = _questionsList[questionID].CorrectAnswerIndex;
+            int i = 0;
+            foreach (var answer in _questionsList[questionID].Answers)
             {
-                var ID = i;
+                int j = i;
                 _options[i].Button.gameObject.SetActive(true);
                 _options[i].Button.interactable = true;
-                
-                if (i == correctAnswerIndex)
-                {
-                    isCorrectInit = true;
-                    _options[i].Text.text = _questionsList[questionID].CorrectAnswer;
-                    _options[i].Button.onClick.AddListener(OnCorrectAnswer);
-                }
-                else
-                {
-                    if (isCorrectInit) ID -= 1;
-                    _options[i].Text.text = _questionsList[questionID].WrongAnswers[ID];
-                    _options[i].Button.onClick.AddListener(OnWrongAnswer);
-                }
+                _options[i].Text.text = answer;
+                _options[i].Button.onClick.AddListener(() => CalculateAnswer(j==correctAnswerIndex));
+                i++;
             }
+            
         }
-        private void CleanUp()
-        {
+
+        private void CleanUp() =>
             ClearButtons();
-            _questionText.text = "";
-            _questionsList.Clear();
-            _questionsCount = 0;
-        }
         private void ClearButtons()
         {
             foreach (var button in _options)
             {
                 button.Button.onClick.RemoveAllListeners();
-                var buttonColors = button.Button.colors;
-                buttonColors.normalColor = Color.white;
                 button.Button.gameObject.SetActive(false);
                 button.Button.interactable = false;
             }
         }
-        private void OnWrongAnswer()
+
+        private void CalculateAnswer(bool isCorrect)
         {
-            _gameData.LifeCount--;
-            if (_gameData.LifeCount < 0)
+            if (isCorrect)
+                _gameData.CorrectAnswerCount++;
+            else
             {
-                OnGameEnd?.Invoke(false, _gameData);
+                _gameData.LifeCount--;
+                if (_gameData.LifeCount < 0)
+                {
+                    End(false);
+                    return;
+                }
             }
-            _gameData.CurrentQuestion++;
-            InitQuestion(_gameData.CurrentQuestion);
             
-            OnUpdateGameUI?.Invoke(_gameData);
-        }
-        private void OnCorrectAnswer()
-        {
-            _gameData.CorrectAnswerCount++;
             _gameData.CurrentQuestion++;
             if (_gameData.CurrentQuestion >= _questionsCount)
             {
                 End(true);
+                return;
             }
-            else InitQuestion(_gameData.CurrentQuestion);
 
+            InitQuestion(_gameData.CurrentQuestion);
+            
             OnUpdateGameUI?.Invoke(_gameData);
         }
-        private void PrepareQuestionList()
+        private void SetupGameConfig()
         {
-            foreach (var questionData in _quizData.QuestionsDataList)
-            {
-                _questionsList.Add(questionData);
-            }
+            if (_gameConfig.MaxLives < 0) _gameConfig.MaxLives = 0;
+            if (_gameConfig.MaxSeconds < 10) _gameConfig.MaxSeconds = int.MaxValue;
         }
-        private void ShuffleQuestionList() => _shuffler.Shuffle(_questionsList);
+        private void ShuffleQuestionList() => 
+            _shuffler.Shuffle(_questionsList);
     }
 
     public enum GameStatus

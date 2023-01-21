@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace Tools.Alghoritm
+namespace Tools.Algorithm
 {
-    public class Shuffler<T> : IShuffler<T>
+    public class Shuffler<T>
     {
-        public List<T> Shuffle(List<T> list)
+        public T[] Shuffle(T[] list)
         {
-            int n = list.Count;
+            int n = list.Length;
             Random rng = new Random();
             while (n > 1)
             {
@@ -17,10 +16,5 @@ namespace Tools.Alghoritm
             }
             return list;
         }
-    }
-
-    public interface IShuffler<T>
-    {
-        public List<T> Shuffle(List<T> list);
     }
 }

@@ -4,23 +4,19 @@ namespace Data
 {
     public class GameData
     {
-        public int CurrentQuestion;
-        public int CorrectAnswerCount;
-        public int LifeCount;
-        public int AllSeconds;
-        public int Seconds;
-        public int Minutes;
+        public int CurrentQuestion {get; set;}
+        public int CorrectAnswerCount {get; set;}
+        public int LifeCount {get; set;}
+        public int AllSeconds {get; private set;}
+        public int Seconds {get; private set;}
+        public int Minutes {get; private set;}
         
-
+        private readonly GameConfig _gameConfig;
+        
         public GameData(GameConfig gameConfig)
         {
-            CurrentQuestion = 0;
-            CorrectAnswerCount = 0;
-            LifeCount = gameConfig.MaxLives;
-            AllSeconds++;
-            Seconds = 0;
-            Minutes = 0;
-            
+            _gameConfig = gameConfig;
+            Reset();
         }
 
 
@@ -33,6 +29,16 @@ namespace Data
                 Minutes++;
                 Seconds = 0;
             }
+        }
+
+        public void Reset()
+        {
+            CurrentQuestion = 0;
+            CorrectAnswerCount = 0;
+            LifeCount = _gameConfig.MaxLives;
+            AllSeconds = 0;
+            Seconds = 0;
+            Minutes = 0;
         }
     }
 }

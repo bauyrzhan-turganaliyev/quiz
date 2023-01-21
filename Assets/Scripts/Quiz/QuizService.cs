@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using System;
+using Data;
 using SaveLoad;
 using UI;
 using UnityEngine;
@@ -23,20 +24,22 @@ namespace Quiz
 
         private void SubscribeServices()
         {
-            _uiService.OnStartGame += _quizProcessService.Begin;
+            _uiService.OnStartGame += StartGame;
             _quizProcessService.OnUpdateGameUI += UpdateGameUI;
-            _quizProcessService.OnGameEnd += OnGameEnd;
+            _quizProcessService.OnGameEnd += EndGame;
         }
 
-        private void UpdateGameUI(GameData gameData)
-        {
+        private void UpdateGameUI(GameData gameData) => 
             _uiService.UpdateGameUI(gameData);
-        }
 
-        private void OnGameEnd(bool flag, GameData gameData)
+        private void StartGame() =>
+            _quizProcessService.Begin();
+        
+        private void EndGame(bool isWin, GameData gameData)
         {
-            _uiService.OnGameEnded(flag, gameData, _progressService.PlayerProgress.BestScore);
-            if (_progressService.PlayerProgress.BestScore < gameData.CorrectAnswerCount && flag)
+            _uiService.EndGame(isWin, gameData, _progressService.PlayerProgress.BestScore);
+            
+            if (_progressService.PlayerProgress.BestScore < gameData.CorrectAnswerCount && isWin)
             {
                 _progressService.PlayerProgress.BestScore = gameData.CorrectAnswerCount;
                 _progressService.SaveLoadService.SaveProgress(_progressService.PlayerProgress);
@@ -44,15 +47,7 @@ namespace Quiz
             }
         }
 
-        private void InitMembers()
-        {
+        private void InitMembers() =>
             _quizProcessService.Init();
-        }
-    }
-
-    public interface IQuizProcessService
-    {
-        void Begin();
-        void End(bool flag);
     }
 }

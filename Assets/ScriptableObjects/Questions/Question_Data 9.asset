@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Question_Data 9
   m_EditorClassIdentifier: 
   Question: Question_Data 9
-  CorrectAnswer: correct
-  WrongAnswers:
+  CorrectAnswerIndex: 0
+  Answers:
+  - correct
   - wrong
   - wrong
   - wrong

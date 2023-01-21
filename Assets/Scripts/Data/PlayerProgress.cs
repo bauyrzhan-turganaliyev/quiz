@@ -2,6 +2,6 @@
 {
     public class PlayerProgress
     {
-        public int BestScore;
+        public int BestScore { get; set; }
     }
 }

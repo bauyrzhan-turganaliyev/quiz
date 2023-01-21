@@ -7,7 +7,7 @@ namespace Config
     public class QuestionData : ScriptableObject
     {
         public string Question;
-        public string CorrectAnswer;
-        public List<string> WrongAnswers;
+        public int CorrectAnswerIndex;
+        public List<string> Answers;
     }
 }

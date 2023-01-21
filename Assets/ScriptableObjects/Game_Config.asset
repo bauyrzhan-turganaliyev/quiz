@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Game_Config
   m_EditorClassIdentifier: 
   MaxLives: 1
-  MaxSeconds: -1
+  MaxSeconds: 0

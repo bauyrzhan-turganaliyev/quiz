@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace UI.Windows
 {
-    public class ResultsWindow : Window, IWindow, IRegister
+    public class ResultsWindow : Window, IRegister
     {
         [SerializeField] private TMP_Text _titleText;
         [SerializeField] private TMP_Text _scoreText;
@@ -15,24 +15,20 @@ namespace UI.Windows
         [SerializeField] private Button _menuButton;
 
         public Action OnBackMenu;
-        public void Init()
-        {
-            Switch(false);
-        }
-        
         public void Register()
         {
-            _menuButton.onClick.AddListener((() => OnBackMenu?.Invoke()));
+            _menuButton.onClick.AddListener(() => OnBackMenu?.Invoke());
         }
 
-        public void ShowResults(bool flag, GameData gameData, int bestScore)
+        public void ShowResults(bool isWin, GameData gameData, int bestScore)
         {
-            _titleText.text = flag ? "You are winner!" : "You are loser!";
-            _titleText.color = flag ? Color.green : Color.red;
+            _titleText.text = isWin ? "You are winner!" : "You are loser!";
+            _titleText.color = isWin ? Color.green : Color.red;
             
             _scoreText.text = bestScore < gameData.CorrectAnswerCount 
                 ? $"NEW BEST SCORE!\n{gameData.CorrectAnswerCount} score(s)" 
                 : $"{gameData.CorrectAnswerCount} score(s)";
+            _scoreText.text += bestScore < gameData.CorrectAnswerCount && !isWin ? " but you lost" : "";
             _timeText.text = $"{gameData.Minutes} minute(s) and {gameData.Seconds} second(s)";
         }
     }

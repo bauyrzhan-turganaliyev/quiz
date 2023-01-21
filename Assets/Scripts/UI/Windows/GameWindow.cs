@@ -4,21 +4,11 @@ using UnityEngine;
 
 namespace UI.Windows
 {
-    public class GameWindow : Window, IWindow, IRegister
+    public class GameWindow : Window
     {
         [SerializeField] private TMP_Text _scoreText;
         [SerializeField] private TMP_Text _timeText;
         [SerializeField] private TMP_Text _livesText;
-
-        public void Init()
-        {
-            Switch(false);
-        }
-        
-        public void Register()
-        {
-            print("Game window registration");
-        }
 
         public void UpdateGameUI(GameData gameData)
         {
